@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="refresh" content="0; URL=/Chat-App-FE/index.html?requestedRoute=${window.location.pathname}">
+  <script>
+    // Extract the current pathname
+    const currentPathname = window.location.pathname;
+    // Redirect to index.html with the requested route as a query parameter
+    window.location.href = `/Chat-App-FE/index.html?requestedRoute=${encodeURIComponent(currentPathname)}`;
+  </script>
 </head>
 <body>
 </body>
