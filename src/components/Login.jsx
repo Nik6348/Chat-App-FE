@@ -45,7 +45,6 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await loginUser(formData);
-      console.log(response);
       setLoading(false);
       login(response.data);
       setSnackbar({

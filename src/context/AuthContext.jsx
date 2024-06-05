@@ -1,45 +1,43 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
-// Create a context to manage user authentication
 const AuthContext = createContext();
 
-// Custom hook to consume the AuthContext
 export const useAuth = () => useContext(AuthContext);
 
-// AuthProvider component to wrap your application
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // State to hold user details
-  const [loading, setLoading] = useState(true); // State to hold loading status
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Function to log in the user
-  const login = (userData) => {
-    console.log(`User logged in successfully: ${userData.userName}`);
-    localStorage.setItem('user', JSON.stringify(userData)); // Store user data in localStorage
-    setUser(userData); // Set user data upon successful login
-  };
-
-  // Function to log out the user
-  const logout = () => {
-    // Perform logout logic (e.g., clear user data)
-    localStorage.removeItem('user'); // Remove user data from localStorage
-    setUser(null); // Clear user data upon logout
-  };
-
-  // Effect to retrieve user data from localStorage when the component is mounted
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get('https://mern-chat-app-be-nik6348s-projects.vercel.app/api/user/me', {
+        withCredentials: true,
+      });
+      setUser(response.data.data);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false); // Set loading to false after user data has been retrieved
+  };
+
+  useEffect(() => {
+    fetchUser();
   }, []);
 
+  const logout = async () => {
+    setUser(null);
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Logout successfully' });
+  };
+  
   if (loading) {
-    return <div>Loading...</div>; // Render a loading message while retrieving user data
+    return <div>Loading...</div>;
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, logout }}>
       {children}
     </AuthContext.Provider>
   );
