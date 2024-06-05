@@ -4,13 +4,13 @@ import Signup from './components/Signup';
 import Login from './components/Login';
 import Chat from './components/Chat';
 import LandingPage from './components/LandingPage';
-import ChatList from './components/ChatList.jsx';
+import ChatList from './components/ChatList';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/Chat-App-FE">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
