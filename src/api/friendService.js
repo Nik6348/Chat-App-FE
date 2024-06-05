@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://mern-chat-app-be-nik6348s-projects.vercel.app/api/friend';
+const API_URL = 'https://chat-app-be-nik6348s-projects.vercel.app/api/friend';
 
 // Send a friend request
 const sendFriendRequest = async (friendId) => {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://mern-chat-app-be-nik6348s-projects.vercel.app/api/message';
+const API_URL = 'https://chat-app-be-nik6348s-projects.vercel.app/api/message';
 
 // Send a new message
 const sendMessage = async (friendId, messageData) => {

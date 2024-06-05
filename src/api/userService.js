@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://mern-chat-app-be-nik6348s-projects.vercel.app/api/user';
+const API_URL = 'https://chat-app-be-nik6348s-projects.vercel.app/api/user';
 
 // Register a new user
 const registerUser = async (userData) => {
