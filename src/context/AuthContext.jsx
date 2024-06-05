@@ -31,9 +31,9 @@ export const AuthProvider = ({ children }) => {
     fetchUserData();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
