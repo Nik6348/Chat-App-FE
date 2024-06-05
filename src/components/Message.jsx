@@ -34,7 +34,6 @@ const Message = ({ message }) => {
       >
         <Box
           display="flex"
-          // justifyContent="space-between"
           alignItems="center"
           flexWrap="wrap"
         >

@@ -1,53 +1,69 @@
-import axios from 'axios';
-
-const API_URL = 'https://chat-app-be-nik6348s-projects.vercel.app/api/friend';
+import axiosInstance from './axiosConfig';
 
 // Send a friend request
 const sendFriendRequest = async (friendId) => {
-  const response = await axios.post(`${API_URL}/send-request/${friendId}`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.post(`/friend/send-request/${friendId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending friend request:', error);
+    throw error;
+  }
 };
 
 // Accept a friend request
 const acceptFriendRequest = async (friendId) => {
-  const response = await axios.post(`${API_URL}/accept-request/${friendId}`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.post(`/friend/accept-request/${friendId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error accepting friend request:', error);
+    throw error;
+  }
 };
 
 // Reject a friend request
 const rejectFriendRequest = async (friendId) => {
-  const response = await axios.post(`${API_URL}/reject-request/${friendId}`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.post(`/friend/reject-request/${friendId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error rejecting friend request:', error);
+    throw error;
+  }
 };
 
 // Get all friends
 const getAllFriends = async () => {
-  const response = await axios.get(`${API_URL}/all-friends`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.get('/friend/all-friends');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting all friends:', error);
+    throw error;
+  }
 };
 
 // Get sent friend requests
 const getSentFriendRequests = async () => {
-  const response = await axios.get(`${API_URL}/sent`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.get('/friend/sent');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting sent friend requests:', error);
+    throw error;
+  }
 };
 
 // Get received friend requests
 const getReceivedFriendRequests = async () => {
-  const response = await axios.get(`${API_URL}/received`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.get('/friend/received');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting received friend requests:', error);
+    throw error;
+  }
 };
 
 export { sendFriendRequest, acceptFriendRequest, rejectFriendRequest, getAllFriends, getSentFriendRequests, getReceivedFriendRequests };

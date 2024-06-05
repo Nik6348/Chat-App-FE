@@ -4,12 +4,13 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CallIcon from '@mui/icons-material/Call';
 import VideoCallIcon from '@mui/icons-material/VideoCall';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getUser } from '../api/userService';
 
 const ChatHeader = () => {
   const { friendId } = useParams();
   const [friendName, setFriendName] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // get friends from friendId
@@ -20,10 +21,14 @@ const ChatHeader = () => {
     fetchFriendsName();
   }, []);
 
+  const handleBack = () => {
+    navigate('/chatlist'); // Navigate back to the chat list
+  };
+
   return (
     <AppBar position="static" color="primary">
       <Toolbar>
-        <IconButton edge="start" color="inherit" aria-label="back">
+        <IconButton edge="start" color="inherit" aria-label="back" onClick={handleBack}>
           <ArrowBackIcon />
         </IconButton>
         <Typography

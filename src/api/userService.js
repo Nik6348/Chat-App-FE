@@ -1,51 +1,69 @@
-import axios from 'axios';
-
-const API_URL = 'https://chat-app-be-nik6348s-projects.vercel.app/api/user';
+import axiosInstance from './axiosConfig';
 
 // Register a new user
 const registerUser = async (userData) => {
-  const response = await axios.post(`${API_URL}/register`, userData);
-  return response.data;
+  try {
+    const response = await axiosInstance.post('/user/register', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
 };
 
 // Login an existing user
 const loginUser = async (userData) => {
-  const response = await axios.post(`${API_URL}/login`, userData, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.post('/user/login', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    throw error;
+  }
 };
 
-// get logged in user's data
+// Get logged in user's data
 const getUserData = async () => {
-  const response = await axios.get(`${API_URL}/me`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.get('/user/me');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user data:', error);
+    throw error;
+  }
 };
 
 // Get user by ID
 const getUser = async (id) => {
-  const response = await axios.get(`${API_URL}/getuser/${id}`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.get(`/user/getuser/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user by ID:', error);
+    throw error;
+  }
 };
 
 // Update user
 const updateUser = async (userData) => {
-  const response = await axios.patch(`${API_URL}/update`, userData, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.patch('/user/update', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
 };
 
 // Delete user
 const deleteUser = async (userId) => {
-  const response = await axios.delete(`${API_URL}/delete/${userId}`, {
-    withCredentials: true
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.delete(`/user/delete/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw error;
+  }
 };
 
 export { registerUser, loginUser, getUser, updateUser, deleteUser, getUserData };

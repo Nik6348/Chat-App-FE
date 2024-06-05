@@ -7,33 +7,29 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  // const [loading, setLoading] = useState(true);
 
   const login = (userData) => {
     setUser(userData);
   };
 
-  // const logout = () => {
-  //   setUser(null);
-  // };
+  const logout = () => {
+    setUser(null);
+  };
 
-  useEffect(() => {
+useEffect(() => {
+  if (!user) {
     const fetchUserData = async () => {
       try {
         const response = await getUserData();
         setUser(response.data);
       } catch (error) {
         console.log('No user logged in');
-      } finally {
-        setLoading(false);
       }
     };
-    fetchUserData();
-  }, []);
 
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
+    fetchUserData();
+  }
+}, []);
 
   return (
     <AuthContext.Provider value={{ user, login }}>

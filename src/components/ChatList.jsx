@@ -1,3 +1,4 @@
+// Import necessary modules
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -40,6 +41,7 @@ import {
 import { getUser } from '../api/userService';
 import { useNavigate } from 'react-router-dom';
 
+// Styled components
 const CustomTab = styled(Tab)(({ theme }) => ({
   '&.Mui-selected': {
     color: theme.palette.primary.main,
@@ -56,15 +58,14 @@ const CustomListItem = styled(ListItem)(({ theme }) => ({
   '&:hover': { backgroundColor: theme.palette.action.hover },
 }));
 
-// Custom styled dialog content
 const CustomDialogContent = styled(DialogContent)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
 function ChatList() {
+  // State variables
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
   const [activeTab, setActiveTab] = useState('friends');
   const [friends, setFriends] = useState([]);
   const [receivedRequests, setReceivedRequests] = useState([]);
@@ -81,6 +82,7 @@ function ChatList() {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Fetch data based on active tab
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -98,8 +100,9 @@ function ChatList() {
       }
     };
     fetchData();
-  }, []);
+  }, [activeTab]);
 
+  // Handle search functionality
   const handleSearch = async () => {
     setLoading(true);
     try {
@@ -119,14 +122,17 @@ function ChatList() {
     }
   };
 
+  // Handle dialog opening
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
 
+  // Handle dialog closing
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
 
+  // Send friend request
   const handleSendRequest = async (receiverId) => {
     try {
       await sendFriendRequest(receiverId);
@@ -146,6 +152,7 @@ function ChatList() {
     }
   };
 
+  // Accept friend request
   const handleAcceptRequest = async (id) => {
     try {
       await acceptFriendRequest(id);
@@ -165,6 +172,7 @@ function ChatList() {
     }
   };
 
+  // Reject friend request
   const handleRejectRequest = async (id) => {
     try {
       await rejectFriendRequest(id);
@@ -184,15 +192,17 @@ function ChatList() {
     }
   };
 
+  // Handle tab change
   const handleTabChange = (_, newValue) => {
     setActiveTab(newValue);
   };
 
+  // Close snackbar
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Redirect to the chat component with the respective friend ID
+  // Redirect to chat component
   const handleOpenChat = (friendId) => {
     navigate(`/chat/${friendId}`);
   };
@@ -209,10 +219,12 @@ function ChatList() {
           p: 2,
         }}
       >
+        {/* User info */}
         <Typography variant="h6" align="center" gutterBottom>
-          {user.fullName} Chat-List
+          {user ? `${user.fullName} Chat-List` : 'Loading...'}
         </Typography>
 
+        {/* Search box */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <TextField
             placeholder="Search Contacts"
@@ -238,7 +250,10 @@ function ChatList() {
           </Button>
         </Box>
 
+        {/* Divider */}
         <Divider sx={{ mb: 2 }} />
+        
+        {/* Tabs for navigation */}
         <AppBar position="static" color="transparent" elevation={0}>
           <Tabs
             value={activeTab}
