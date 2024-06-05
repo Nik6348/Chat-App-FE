@@ -105,8 +105,6 @@ function ChatList() {
     try {
       const response = await getUser(searchQuery);
       const results = response.data;
-      console.log(response)
-
       setLoading(false);
       if (results) {
         setSelectedUser(results);
