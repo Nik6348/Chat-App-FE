@@ -5,11 +5,9 @@ import Login from './components/Login';
 import Chat from './components/Chat';
 import LandingPage from './components/LandingPage';
 import ChatList from './components/ChatList';
-import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <AuthProvider>
       <Router basename="/Chat-App-FE">
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -19,7 +17,6 @@ function App() {
           <Route path="/chatlist" element={<ChatList />} />
         </Routes>
       </Router>
-    </AuthProvider>
   );
 }
 
