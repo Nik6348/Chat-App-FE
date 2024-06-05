@@ -44,20 +44,16 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-     await loginUser(formData);
-      setLoading(false);
-      setSnackbar({
-        open: true,
-        message: 'User logged in successfully',
-        severity: 'success',
-      });
-      navigate('/chatlist'); // Redirect to ChatList
+      const response = await loginUser(formData);
+      login(response.data);
+      setSnackbar({ open: true, message: 'User logged in successfully', severity: 'success' });
+      navigate('/chatlist');
     } catch (error) {
-      setLoading(false);
       setSnackbar({ open: true, message: 'Login failed!', severity: 'error' });
+    } finally {
+      setLoading(false);
     }
   };
-
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };

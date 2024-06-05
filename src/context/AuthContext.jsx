@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import { getUserData } from '../api/userService';
 
 const AuthContext = createContext();
 
@@ -9,35 +9,34 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get('https://chat-app-be-nik6348s-projects.vercel.app/api/user/me', {
-        withCredentials: true,
-      });
-      setUser(response.data.data);
-    } catch (error) {
-      console.error('Error fetching user:', error);
-    } finally {
-      setLoading(false);
-    }
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  const logout = () => {
+    setUser(null);
   };
 
   useEffect(() => {
-    fetchUser();
+    const fetchUserData = async () => {
+      try {
+        const response = await getUserData();
+        setUser(response.data);
+      } catch (error) {
+        console.log('No user logged in');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserData();
   }, []);
 
-  const logout = async () => {
-    setUser(null);
-    res.clearCookie('token');
-    res.status(200).json({ message: 'Logout successfully' });
-  };
-  
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <AuthContext.Provider value={{ user, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

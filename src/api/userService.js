@@ -11,10 +11,19 @@ const registerUser = async (userData) => {
 // Login an existing user
 const loginUser = async (userData) => {
   const response = await axios.post(`${API_URL}/login`, userData, {
-    withCredentials: true 
+    withCredentials: true
   });
   return response.data;
 };
+
+// get logged in user's data
+const getUserData = async () => {
+  const response = await axios.get(`${API_URL}/me`, {
+    withCredentials: true, // Include credentials in the request
+  });
+  return response.data;
+};
+
 
 // Get user by ID
 const getUser = async (id) => {
@@ -34,4 +43,4 @@ const deleteUser = async (userId) => {
   return response.data;
 };
 
-export { registerUser, loginUser, getUser, updateUser, deleteUser };
+export { registerUser, loginUser, getUser, updateUser, deleteUser,getUserData };
