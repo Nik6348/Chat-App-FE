@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('https://chat-app-be-nik6348s-projects.vercel.app', {
+      const response = await axios.get('https://chat-app-be-nik6348s-projects.vercel.app/api/user/me', {
         withCredentials: true,
       });
       setUser(response.data.data);

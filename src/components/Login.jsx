@@ -44,9 +44,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await loginUser(formData);
+     await loginUser(formData);
       setLoading(false);
-      login(response.data);
       setSnackbar({
         open: true,
         message: 'User logged in successfully',
