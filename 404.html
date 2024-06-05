@@ -2,10 +2,11 @@
 <html>
 <head>
   <script>
-    // Extract the current pathname
-    const currentPathname = window.location.pathname;
-    // Redirect to index.html with the requested route as a query parameter
-    window.location.href = `/Chat-App-FE/index.html?requestedRoute=${encodeURIComponent(currentPathname)}`;
+    // Extract the requested route from the URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedRoute = urlParams.get('requestedRoute');
+    // Redirect to index.html with the requested route
+    window.location.href = `/${requestedRoute}`;
   </script>
 </head>
 <body>
