@@ -44,6 +44,17 @@ const getUser = async (id) => {
   }
 };
 
+// search users by userName
+const searchUsers = async (query) => {
+  try {
+    const response = await axiosInstance.get(`/user/search/${query}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error searching users:', error);
+    throw error;
+  }
+}
+
 // Update user
 const updateUser = async (userData) => {
   try {
@@ -66,4 +77,4 @@ const deleteUser = async (userId) => {
   }
 };
 
-export { registerUser, loginUser, getUser, updateUser, deleteUser, getUserData };
+export { registerUser, loginUser, getUser, updateUser, deleteUser, getUserData,searchUsers };

@@ -1,87 +1,49 @@
-import * as React from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useSpring, animated } from '@react-spring/three';
-import { Box, Button, Typography } from '@mui/material';
+import React from 'react';
+import { Button, Typography, Container, Box, Grow } from '@mui/material';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useNavigate } from 'react-router-dom';
 
-function LandingPage() {
+const LandingPage = () => {
   const navigate = useNavigate();
-  const [isHovered, setIsHovered] = React.useState(false);
 
-  const springProps = useSpring({
-    scale: isHovered ? 1.1 : 1,
-    config: { mass: 1, friction: 20, tension: 170 },
-  });
-
-  function AnimatedBubbles() {
-    const group = React.useRef();
-    const sphereCount = 10;
-
-    useFrame(() => {
-      if (group.current) {
-        group.current.rotation.y += 0.005;
-      }
-    });
-
-    return (
-      <group ref={group}>
-        {[...Array(sphereCount)].map((_, index) => (
-          <animated.mesh
-            key={index}
-            position={[
-              (Math.random() - 0.5) * 8,
-              (Math.random() - 0.5) * 8,
-              (Math.random() - 0.5) * 8,
-            ]}
-            onPointerOver={() => setIsHovered(true)}
-            onPointerOut={() => setIsHovered(false)}
-          >
-            <sphereGeometry args={[0.5, 32, 32]} />
-            <meshBasicMaterial color={isHovered ? 'lightgreen' : 'lightblue'} />
-          </animated.mesh>
-        ))}
-      </group>
-    );
-  }
+  const handleStartChat = () => {
+    navigate('/signup');
+  };
 
   return (
-    <Box
+    <Container
       sx={{
-        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        height: '100vh',
+        textAlign: 'center',
       }}
     >
-      {/* 3D Animated Area */}
-      <Canvas style={{ height: '40vh' }} camera={{ position: [0, 0, 10] }}>
-        <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-        <pointLight position={[-10, -10, -10]} />
-        <AnimatedBubbles />
-      </Canvas>
-
-      {/* Content and Button */}
-      <Box sx={{ textAlign: 'center' }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
-          Secure Chat App
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Your privacy, our priority.
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          sx={{ backgroundColor: '#2196f3' }}
-          onClick={() => navigate('/signup')}
-        >
-          Start Chat
-        </Button>
-      </Box>
-    </Box>
+      <Grow in={true}>
+        <Box>
+          <ChatBubbleOutlineIcon sx={{ fontSize: 100, color: 'primary.main' }} />
+          <Typography variant="h2" component="h1" gutterBottom>
+            Welcome to Chat App
+          </Typography>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Connect with your friends and family instantly!
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<ChatBubbleOutlineIcon />}
+            onClick={handleStartChat}
+            sx={{ mt: 3 }}
+          >
+            Start Chatting
+          </Button>
+        </Box>
+      </Grow>
+    </Container>
   );
-}
+};
 
 export default LandingPage;

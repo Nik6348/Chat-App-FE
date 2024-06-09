@@ -1,30 +1,40 @@
-import { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 const useSocket = (userId, setMessages) => {
-  const socketRef = useRef();
-  const apiUrl = 'https://chat-app-be-nik6348s-projects.vercel.app/';
-  useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io(apiUrl, { query: { userId } });
+    const socketRef = useRef(null);
+    const apiUrl = 'https://chat-app-be-nik6348s-projects.vercel.app/';
+    const [isLoading, setIsLoading] = useState(true);
 
-      // Listen for messages from the server
-      socketRef.current.on('chat message', (msg) => {
-        setMessages((prevMessages) => [...prevMessages, msg]);
-      });
-    }
+    useEffect(() => {
+        if (userId) {
+            const socket = io(apiUrl, { query: { userId } });
+            socketRef.current = socket;
 
-    // Cleanup on component unmount
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off('chat message');
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-    };
-  }, [userId, setMessages]);
+            socket.on('connect', () => {
+                setIsLoading(false);
+            });
 
-  return socketRef.current;
+            socket.on('chat message', (msg) => {
+                setMessages((prevMessages) => [...prevMessages, msg]);
+            });
+
+            socket.on('message status', (updatedMessage) => {
+                setMessages(prevMessages => prevMessages.map(msg =>
+                    msg._id === updatedMessage._id ? updatedMessage : msg
+                ));
+            });
+
+            return () => {
+                socket.off('chat message');
+                socket.off('message status');
+                socket.disconnect();
+                socketRef.current = null; 
+            };
+        }
+    }, [userId]);
+
+    return { socket: socketRef.current, isLoading };
 };
 
 export default useSocket;
