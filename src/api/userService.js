@@ -44,6 +44,17 @@ const getUser = async (id) => {
   }
 };
 
+// search users by userName
+const searchUsers = async (query) => {
+  try {
+    const response = await axiosInstance.get(`/user/search/${query}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error searching users:', error);
+    throw error;
+  }
+}
+
 // Update user
 const updateUser = async (userData) => {
   try {
@@ -66,4 +77,14 @@ const deleteUser = async (userId) => {
   }
 };
 
-export { registerUser, loginUser, getUser, updateUser, deleteUser, getUserData };
+const isLogin = async () => {
+  try {
+    const response = await axiosInstance.get('/user/islogin');
+    return response.status === 200;
+  } catch (error) {
+    console.error('Error checking login status:', error);
+    throw error;
+  }
+};
+
+export { registerUser, loginUser, getUser, updateUser, deleteUser, getUserData, searchUsers, isLogin };

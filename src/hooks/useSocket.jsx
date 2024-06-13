@@ -2,29 +2,42 @@ import { useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 const useSocket = (userId, setMessages) => {
+  const apiUrl = 'http://localhost:3000';
   const socketRef = useRef();
-  const apiUrl = 'https://chat-app-be-nik6348s-projects.vercel.app/';
+
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io(apiUrl, { query: { userId } });
+    socketRef.current = io(apiUrl, { query: { userId } });
 
-      // Listen for messages from the server
-      socketRef.current.on('chat message', (msg) => {
-        setMessages((prevMessages) => [...prevMessages, msg]);
+    socketRef.current.on('connect', () => {
+      console.log('Connected to socket server');
+    });
+
+    socketRef.current.on('disconnect', () => {
+      console.log('Disconnected from socket server');
+    });
+
+    socketRef.current.on('receive_message', (msg) => {
+      console.log('Message received on client: ', msg);
+      setMessages((prevMessages) => [...prevMessages, msg]);
+    });
+
+    socketRef.current.on('update_message_status', ({ messageId, status }) => {
+      console.log('Message status update received on client: ', {
+        messageId,
+        status,
       });
-    }
-
-    // Cleanup on component unmount
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId ? { ...msg, status } : msg
+        )
+      );
+    });
     return () => {
-      if (socketRef.current) {
-        socketRef.current.off('chat message');
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+      socketRef.current.disconnect();
     };
   }, [userId, setMessages]);
 
-  return socketRef.current;
+  return { socket: socketRef.current };
 };
 
 export default useSocket;

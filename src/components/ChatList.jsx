@@ -1,4 +1,3 @@
-// Import necessary modules
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -20,15 +19,21 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress,
   Snackbar,
   Alert,
   useMediaQuery,
   useTheme,
+  IconButton,
+  InputAdornment,
+  BottomNavigation,
+  BottomNavigationAction,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { styled } from '@mui/material/styles';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import ChatIcon from '@mui/icons-material/Chat';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { styled } from '@mui/material/styles';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import {
   sendFriendRequest,
@@ -38,41 +43,41 @@ import {
   getSentFriendRequests,
   getReceivedFriendRequests,
 } from '../api/friendService';
-import { getUser } from '../api/userService';
+import StyledDialog from './StyledDialog.jsx';
+import PeopleIcon from '@mui/icons-material/People';
+import MarkAsUnreadIcon from '@mui/icons-material/MarkAsUnread';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+
+import { searchUsers } from '../api/userService';
 import { useNavigate } from 'react-router-dom';
 
-// Styled components
-const CustomTab = styled(Tab)(({ theme }) => ({
-  '&.Mui-selected': {
-    color: theme.palette.primary.main,
-    fontWeight: theme.typography.fontWeightBold,
+// Styling
+const AnimatedAvatar = styled(Avatar)(({ theme }) => ({
+  transition: 'transform 0.3s ease',
+  boxShadow: theme.shadows[2],
+  '&:hover': {
+    transform: 'scale(1.1)',
+    boxShadow: theme.shadows[4],
   },
 }));
 
-const CustomAvatar = styled(Avatar)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.getContrastText(theme.palette.primary.main),
-}));
-
-const CustomListItem = styled(ListItem)(({ theme }) => ({
-  '&:hover': { backgroundColor: theme.palette.action.hover },
-}));
-
-const CustomDialogContent = styled(DialogContent)(({ theme }) => ({
-  padding: theme.spacing(2),
+const GradientDivider = styled(Divider)(({ theme }) => ({
+  height: '2px',
+  background: `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+  margin: '16px 0',
 }));
 
 function ChatList() {
-  // State variables
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeTab, setActiveTab] = useState('friends');
   const [friends, setFriends] = useState([]);
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredFriends, setFilteredFriends] = useState([]);
+  const [searchUserTerm, setSearchUserTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState({
@@ -80,9 +85,9 @@ function ChatList() {
     message: '',
     severity: 'success',
   });
-  const [searchQuery, setSearchQuery] = useState('');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Fetch data based on active tab
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -102,37 +107,23 @@ function ChatList() {
     fetchData();
   }, [activeTab]);
 
-  // Handle search functionality
-  const handleSearch = async () => {
-    setLoading(true);
-    try {
-      const response = await getUser(searchQuery);
-      const results = response.data;
-      setLoading(false);
-      if (results) {
-        setSelectedUser(results);
-        setOpenDialog(true);
-      } else {
-        setOpenDialog(false);
-      }
-    } catch (error) {
-      console.error('Error searching users:', error);
-      setLoading(false);
-      setOpenDialog(false);
-    }
-  };
+  useEffect(() => {
+    setFilteredFriends(
+      friends.filter((friend) =>
+        friend.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [searchTerm, friends]);
 
-  // Handle dialog opening
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
 
-  // Handle dialog closing
   const handleCloseDialog = () => {
     setOpenDialog(false);
+    setSelectedUser(null); // Clear selected user
   };
 
-  // Send friend request
   const handleSendRequest = async (receiverId) => {
     try {
       await sendFriendRequest(receiverId);
@@ -152,7 +143,6 @@ function ChatList() {
     }
   };
 
-  // Accept friend request
   const handleAcceptRequest = async (id) => {
     try {
       await acceptFriendRequest(id);
@@ -172,7 +162,6 @@ function ChatList() {
     }
   };
 
-  // Reject friend request
   const handleRejectRequest = async (id) => {
     try {
       await rejectFriendRequest(id);
@@ -192,24 +181,50 @@ function ChatList() {
     }
   };
 
-  // Handle tab change
   const handleTabChange = (_, newValue) => {
     setActiveTab(newValue);
   };
 
-  // Close snackbar
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Redirect to chat component
   const handleOpenChat = (friendId) => {
+    // Ensure friendId is not undefined or null
+    if (!friendId) {
+      console.error('Friend ID is missing or invalid.');
+      setSnackbar({
+        open: true,
+        message: 'Failed to open chat',
+        severity: 'error',
+      });
+      return; // Prevent further execution if friendId is invalid
+    }
+    // Navigate to the chat page, passing the friendId
     navigate(`/chat/${friendId}`);
+  };
+
+  const handleSearchUser = async (event) => {
+    const { value } = event.target;
+    setSearchUserTerm(value);
+    if (value.length > 0) {
+      try {
+        const response = await searchUsers(value);
+        setSearchResults(response.data || []);
+      } catch (error) {
+        console.error('Error searching users:', error);
+      }
+    } else {
+      setSearchResults([]);
+    }
   };
 
   return (
     <Container>
-      <Box
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
         sx={{
           width: '100%',
           bgcolor: 'background.paper',
@@ -219,164 +234,239 @@ function ChatList() {
           p: 2,
         }}
       >
-        {/* User info */}
-        <Typography variant="h6" align="center" gutterBottom>
-          {user ? `${user.fullName} Chat-List` : 'Loading...'}
-        </Typography>
-
-        {/* Search box */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <TextField
-            placeholder="Search Contacts"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{ startAdornment: <SearchIcon /> }}
-            fullWidth
-          />
-          <Button
-            onClick={handleSearch}
-            disabled={loading}
-            variant="contained"
-            color="primary"
-            startIcon={
-              loading ? <CircularProgress size={24} /> : <SearchIcon />
-            }
-            style={{
-              margin: '10px',
-              backgroundColor: loading ? '#757575' : '#3f51b5',
-            }}
-          >
-            {loading ? 'Loading...' : 'Search'}
-          </Button>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Typography variant="h6">
+            {user ? `Welcome ${user.fullName}` : 'Loading...'}
+          </Typography>
+          <IconButton onClick={() => navigate('/settings')}>
+            <SettingsIcon />
+          </IconButton>
         </Box>
 
-        {/* Divider */}
-        <Divider sx={{ mb: 2 }} />
-        
-        {/* Tabs for navigation */}
-        <AppBar position="static" color="transparent" elevation={0}>
-          <Tabs
+        {/* Enhanced Search with Autocomplete */}
+        <TextField
+          fullWidth
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ my: 2 }}
+        />
+
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<PersonAddIcon />}
+          onClick={handleOpenDialog}
+          sx={{ mb: 2 }}
+        >
+          Add New Friends
+        </Button>
+
+        <GradientDivider />
+
+        {/* Responsive Tabs/Bottom Navigation */}
+        {isMobile ? ( // Conditional rendering for mobile
+          <BottomNavigation
             value={activeTab}
             onChange={handleTabChange}
-            centered={!isMobile}
+            showLabels
           >
-            <CustomTab label="My Friends" value="friends" />
-            <CustomTab label="Received Requests" value="receivedRequests" />
-            <CustomTab label="Sent Requests" value="sentRequests" />
-          </Tabs>
-        </AppBar>
+            <BottomNavigationAction
+              label="Friends"
+              value="friends"
+              icon={<PeopleIcon />}
+            />
+            <BottomNavigationAction
+              label="Received"
+              value="receivedRequests"
+              icon={<MarkAsUnreadIcon />}
+            />
+            <BottomNavigationAction
+              label="Pending"
+              value="sentRequests"
+              icon={<PendingActionsIcon />}
+            />
+          </BottomNavigation>
+        ) : (
+          // Desktop/Larger Screens
+          <AppBar position="static" color="transparent" elevation={0}>
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              TabIndicatorProps={{
+                style: {
+                  background: 'linear-gradient(to right, #ff4081, #f50057)',
+                },
+              }}
+            >
+              <Tab label="My Friends" value="friends" />
+              <Tab label="Received Requests" value="receivedRequests" />
+              <Tab label="Sent Requests" value="sentRequests" />
+            </Tabs>
+          </AppBar>
+        )}
 
         {/* Content for each tab */}
-        <List>
-          {activeTab === 'friends' &&
-            friends.map((friend, index) => (
-              <React.Fragment key={index}>
-                <CustomListItem onClick={() => handleOpenChat(friend._id)}>
+        <AnimatePresence>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <List>
+              {activeTab === 'friends' &&
+                filteredFriends.map((friend) => (
+                  <React.Fragment key={friend._id}>
+                    <ListItem button onClick={() => handleOpenChat(friend._id)}>
+                      <ListItemAvatar>
+                        <AnimatedAvatar>
+                          {friend.fullName.charAt(0)}
+                        </AnimatedAvatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={friend.fullName}
+                        secondary={`(${friend.userName})`}
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton
+                          edge="end"
+                          aria-label="chat"
+                          onClick={() => handleOpenChat(friend._id)}
+                        >
+                          <ChatIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    <Divider variant="inset" component="li" />
+                  </React.Fragment>
+                ))}
+
+              {activeTab === 'receivedRequests' &&
+                receivedRequests.map((request) => (
+                  <React.Fragment key={request._id}>
+                    <ListItem>
+                      <ListItemAvatar>
+                        <AnimatedAvatar>
+                          {request.sender.fullName.charAt(0)}
+                        </AnimatedAvatar>
+                      </ListItemAvatar>
+                      <ListItemText primary={request.sender.fullName} />
+                      <ListItemSecondaryAction>
+                        <Button
+                          onClick={() => handleAcceptRequest(request._id)}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          onClick={() => handleRejectRequest(request._id)}
+                        >
+                          Reject
+                        </Button>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    <Divider variant="inset" component="li" />
+                  </React.Fragment>
+                ))}
+
+              {activeTab === 'sentRequests' &&
+                sentRequests.map((request) => (
+                  <React.Fragment key={request._id}>
+                    <ListItem>
+                      <ListItemAvatar>
+                        <AnimatedAvatar>
+                          {request.receiver.fullName.charAt(0)}
+                        </AnimatedAvatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={request.receiver.fullName}
+                        secondary="Pending"
+                      />
+                    </ListItem>
+                    <Divider variant="inset" component="li" />
+                  </React.Fragment>
+                ))}
+            </List>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Friend Request Dialog */}
+        <StyledDialog
+          fullScreen={isMobile}
+          open={openDialog}
+          onClose={handleCloseDialog}
+        >
+          <DialogTitle>Search Users</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              placeholder="Search Users..."
+              value={searchUserTerm}
+              onChange={handleSearchUser}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ my: 2 }}
+            />
+            <List>
+              {searchResults.map((user) => (
+                <ListItem key={user._id}>
                   <ListItemAvatar>
-                    <CustomAvatar>
-                      {friend.fullName ? friend.fullName.charAt(0) : ''}
-                    </CustomAvatar>
+                    <AnimatedAvatar>{user.fullName.charAt(0)}</AnimatedAvatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={friend.fullName}
-                    secondary={friend.username}
+                    primary={user.fullName}
+                    secondary={`(${user.userName})`}
                   />
-                </CustomListItem>
-                <Divider variant="inset" component="li" />
-              </React.Fragment>
-            ))}
-
-          {activeTab === 'receivedRequests' &&
-            receivedRequests.map((request, index) => (
-              <React.Fragment key={index}>
-                <ListItem>
-                  <ListItemAvatar>
-                    <CustomAvatar>
-                      {request.sender.fullName
-                        ? request.sender.fullName.charAt(0)
-                        : ''}
-                    </CustomAvatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={request.sender.fullName} />
                   <ListItemSecondaryAction>
-                    <Button onClick={() => handleAcceptRequest(request._id)}>
-                      Accept
-                    </Button>
-                    <Button onClick={() => handleRejectRequest(request._id)}>
-                      Reject
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleSendRequest(user._id)}
+                    >
+                      Add Friend
                     </Button>
                   </ListItemSecondaryAction>
                 </ListItem>
-                <Divider variant="inset" component="li" />
-              </React.Fragment>
-            ))}
+              ))}
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </StyledDialog>
 
-          {activeTab === 'sentRequests' &&
-            sentRequests.map((request, index) => (
-              <React.Fragment key={index}>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {request.receiver.fullName
-                        ? request.receiver.fullName.charAt(0)
-                        : ''}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={request.receiver.fullName}
-                    secondary="Pending"
-                  />
-                </ListItem>
-                <Divider variant="inset" component="li" />
-              </React.Fragment>
-            ))}
-        </List>
-        <Divider />
-      </Box>
-
-      {/* Friend Request Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Send Friend Request</DialogTitle>
-        {selectedUser && (
-          <CustomDialogContent>
-            <ListItemAvatar>
-              <CustomAvatar>
-                {selectedUser.fullName && selectedUser.fullName.charAt(0)}
-              </CustomAvatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={selectedUser.fullName}
-              secondary={selectedUser.username}
-            />
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button
-                onClick={() => handleSendRequest(selectedUser._id)}
-                startIcon={<PersonAddIcon />}
-                variant="contained"
-                color="primary"
-              >
-                Send Request
-              </Button>
-            </DialogActions>
-          </CustomDialogContent>
-        )}
-      </Dialog>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
           onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </motion.div>
     </Container>
   );
 }
