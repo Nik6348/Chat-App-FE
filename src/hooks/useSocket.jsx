@@ -2,11 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client'; 
 
 const useSocket = (userId, setMessages) => {
-  const apiUrl = 'http://localhost:3000';
+  // const apiUrl = 'http://localhost:3000';
+  const apiUrl = 'https://chat-app-be-nik6348s-projects.vercel.app';
+
   const socketRef = useRef();
 
   useEffect(() => {
-    socketRef.current = io(apiUrl, { query: { userId } });
+    socketRef.current = io(apiUrl, {
+      query: { userId },
+      withCredentials: true,
+    });
 
     socketRef.current.on('connect', () => {
       console.log('Connected to socket server');
