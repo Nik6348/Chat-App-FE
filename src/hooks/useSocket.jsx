@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client'; 
 
 const useSocket = (userId, setMessages) => {
   const apiUrl = 'http://localhost:3000';
