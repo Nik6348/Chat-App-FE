@@ -3,9 +3,7 @@ import { Container, Paper, Grid, Box } from '@mui/material';
 import Message from './Message';
 import InputField from './InputField';
 import ChatHeader from './ChatHeader';
-import {
-  getMessages as getMessagesAPI,
-} from '../api/messageService';
+import { getMessages as getMessagesAPI } from '../api/messageService';
 import { useParams } from 'react-router-dom';
 import useSocket from '../hooks/useSocket';
 import { useAuth } from '../context/AuthContext';
@@ -28,15 +26,13 @@ const Chat = () => {
   }, [friendId]);
 
   const sendMessage = async (message) => {
-  // Create a new message object
-  const newMessage = {
-    sender: user._id,
-    receiver: friendId,
-    text:message,
-    status: 'Sent',
-    createdAt: new Date(),
-  };
-  
+    // Create a new message object
+    const newMessage = {
+      sender: user._id,
+      receiver: friendId,
+      text: message,
+    };
+
     // Send message to the server
     socket.emit('send_message', newMessage);
 
@@ -44,7 +40,7 @@ const Chat = () => {
     setTimeout(async () => {
       socket.emit('message_delivered', { messageId: latestMessage._id });
     }, 1000);
-
+    
   };
 
   // Function to mark a message as seen
