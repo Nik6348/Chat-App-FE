@@ -26,11 +26,13 @@ const useSocket = (userId, setMessages) => {
       'update_message_status',
       async ({ messageId, status }) => {
         await updateStatusAPI(messageId, status);
+
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
             message._id === messageId ? { ...message, status } : message
           )
         );
+        
         // Cleanup on component unmount
         return () => {
           if (socketRef.current) {

@@ -4,7 +4,6 @@ import Message from './Message';
 import InputField from './InputField';
 import ChatHeader from './ChatHeader';
 import {
-  sendMessage as sendMessageAPI,
   getMessages as getMessagesAPI,
 } from '../api/messageService';
 import { useParams } from 'react-router-dom';
@@ -45,6 +44,7 @@ const Chat = () => {
     setTimeout(async () => {
       socket.emit('message_delivered', { messageId: latestMessage._id });
     }, 1000);
+
   };
 
   // Function to mark a message as seen
