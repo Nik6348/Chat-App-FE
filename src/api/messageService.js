@@ -19,6 +19,15 @@ const uploadFile = async (formData) => {
     throw error;
   }
 };
+const getMessageById = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/message/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting message by ID:', error);
+    throw error;
+  }
+};
 
 const getMessages = async (friendId) => {
   try {
@@ -30,9 +39,9 @@ const getMessages = async (friendId) => {
   }
 };
 
-const updateStatus = async (messageId, messageData) => {
+const updateStatus = async (messageId, status) => {
   try {
-    const response = await axiosInstance.put(`/message/update-status/${messageId}`, messageData);
+    const response = await axiosInstance.put(`/message/update-status/${messageId}`, status);
     return response.data;
   } catch (error) {
     console.error('Error updating message status:', error);
@@ -60,4 +69,4 @@ const deleteAllMessages = async (friendId) => {
   }
 };
 
-export { sendMessage, uploadFile, getMessages, updateStatus, deleteMessage, deleteAllMessages };
+export { sendMessage, uploadFile, getMessageById, getMessages, updateStatus, deleteMessage, deleteAllMessages };
