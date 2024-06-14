@@ -30,18 +30,28 @@ const Chat = () => {
   }, [friendId]);
 
   const sendMessage = async (message) => {
-    const newMessage = {
-      text: message,
-      sender: user._id,
-      receiver: friendId,
-      status: 'Sent',
-      createdAt: new Date(),
-    };
-    socket.emit('send_message', newMessage);
+    // Call message API
+    const savedMessage = await sendMessageAPI(friendId, message);
 
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    // Fetch the latest messages to get the decrypted message
+    const messages = await getMessagesAPI(friendId);
+    const latestMessage = messages.data[messages.data.length - 1];
 
-    await sendMessageAPI(friendId, message);
+    // Send message to the server
+    socket.emit('send_message', latestMessage);
+
+    // Simulate message delivery and read status updates
+    setTimeout(async () => {
+      const updatedMessage = { ...latestMessage, status: 'Delivered' };
+      await editMessage(savedMessage.data._id, updatedMessage);
+      socket.emit('message status', updatedMessage);
+    }, 1000);
+
+    setTimeout(async () => {
+      const updatedMessage = { ...latestMessage, status: 'Seen' };
+      await editMessage(savedMessage.data._id, updatedMessage);
+      socket.emit('message status', updatedMessage);
+    }, 3000);
   };
 
   const markAsDelivered = async (messageId) => {
