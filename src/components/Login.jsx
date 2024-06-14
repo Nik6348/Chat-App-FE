@@ -45,8 +45,12 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await loginUser(formData);
-      login(response.data);
-      setSnackbar({ open: true, message: 'User logged in successfully', severity: 'success' });
+      await login(response.data);
+      setSnackbar({
+        open: true,
+        message: 'User logged in successfully',
+        severity: 'success',
+      });
       navigate('/chatlist');
     } catch (error) {
       setSnackbar({ open: true, message: 'Login failed!', severity: 'error' });

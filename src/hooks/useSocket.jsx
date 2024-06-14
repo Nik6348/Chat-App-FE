@@ -1,40 +1,65 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import io from 'socket.io-client';
+import {
+  getMessages as getMessagesAPI,
+  updateStatus as updateStatusAPI,
+} from '../api/messageService';
 
 const useSocket = (userId, setMessages) => {
-    const socketRef = useRef(null);
-    const apiUrl = 'https://chat-app-be-nik6348s-projects.vercel.app/';
-    const [isLoading, setIsLoading] = useState(true);
+  const apiUrl = 'https://chat-app-be-nik6348s-projects.vercel.app/';
+  // const apiUrl = 'http://localhost:3000/'
+  const socketRef = useRef();
 
-    useEffect(() => {
-        if (userId) {
-            const socket = io(apiUrl, { query: { userId } });
-            socketRef.current = socket;
+  useEffect(() => {
+    socketRef.current = io(apiUrl, { query: { userId } });
 
-            socket.on('connect', () => {
-                setIsLoading(false);
-            });
+    socketRef.current.on('connect', () => {
+      console.log('Connected to socket server');
+    });
 
-            socket.on('chat message', (msg) => {
-                setMessages((prevMessages) => [...prevMessages, msg]);
-            });
+    socketRef.current.on('disconnect', () => {
+      console.log('Disconnected from socket server');
+    });
 
-            socket.on('message status', (updatedMessage) => {
-                setMessages(prevMessages => prevMessages.map(msg =>
-                    msg._id === updatedMessage._id ? updatedMessage : msg
-                ));
-            });
+    // Handle connection errors
+    socketRef.current.on('connect_error', (error) => {
+      console.error('Connection error:', error);
+    });
 
-            return () => {
-                socket.off('chat message');
-                socket.off('message status');
-                socket.disconnect();
-                socketRef.current = null; 
-            };
-        }
-    }, [userId]);
+    // Handle other errors
+    socketRef.current.on('error', (error) => {
+      console.error('An error occurred:', error);
+    });
 
-    return { socket: socketRef.current, isLoading };
+    // Listen for new messages
+    socketRef.current.on('receive_message', async (msg) => {
+      console.log('Received message:', msg);
+      // get decrypted message
+      const message = await getMessagesAPI(msg._id);
+      console.log('Decrypted message:', message);
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    // Listen for message status updates
+    socketRef.current.on(
+      'update_message_status',
+      async ({ messageId, status }) => {
+        console.log('Received message status update:', { messageId, status });
+        // Update the message status in the db
+        await updateStatusAPI(messageId, status);
+        setMessages((prevMessages) =>
+          prevMessages.map((message) =>
+            message._id === messageId ? { ...message, status } : message
+          )
+        );
+      }
+    );
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, [userId, setMessages]);
+
+  return { socket: socketRef.current };
 };
 
 export default useSocket;

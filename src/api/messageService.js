@@ -1,9 +1,8 @@
 import axiosInstance from './axiosConfig';
 
-// Send a new message
 const sendMessage = async (friendId, messageData) => {
   try {
-    const response = await axiosInstance.post(`/message/send/${friendId}`, messageData);
+    const response = await axiosInstance.post(`/message/send/${friendId}`, { text: messageData });
     return response.data;
   } catch (error) {
     console.error('Error sending message:', error);
@@ -11,7 +10,16 @@ const sendMessage = async (friendId, messageData) => {
   }
 };
 
-// Get all messages between two users
+const uploadFile = async (formData) => {
+  try {
+    const response = await axiosInstance.post('/message/upload', formData);
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    throw error;
+  }
+};
+
 const getMessages = async (friendId) => {
   try {
     const response = await axiosInstance.get(`/message/${friendId}`);
@@ -22,18 +30,16 @@ const getMessages = async (friendId) => {
   }
 };
 
-// Edit a message
-const editMessage = async (messageId, messageData) => {
+const updateStatus = async (messageId, messageData) => {
   try {
-    const response = await axiosInstance.put(`/message/edit/${messageId}`, messageData);
+    const response = await axiosInstance.put(`/message/update-status/${messageId}`, messageData);
     return response.data;
   } catch (error) {
-    console.error('Error editing message:', error);
+    console.error('Error updating message status:', error);
     throw error;
   }
 };
 
-// Delete a message
 const deleteMessage = async (messageId) => {
   try {
     const response = await axiosInstance.delete(`/message/delete/${messageId}`);
@@ -44,7 +50,6 @@ const deleteMessage = async (messageId) => {
   }
 };
 
-// Delete all messages between two users
 const deleteAllMessages = async (friendId) => {
   try {
     const response = await axiosInstance.delete(`/message/deleteAll/${friendId}`);
@@ -55,4 +60,4 @@ const deleteAllMessages = async (friendId) => {
   }
 };
 
-export { sendMessage, getMessages, editMessage, deleteMessage, deleteAllMessages };
+export { sendMessage, uploadFile, getMessages, updateStatus, deleteMessage, deleteAllMessages };

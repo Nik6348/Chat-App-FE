@@ -77,4 +77,14 @@ const deleteUser = async (userId) => {
   }
 };
 
-export { registerUser, loginUser, getUser, updateUser, deleteUser, getUserData,searchUsers };
+const isLogin = async () => {
+  try {
+    const response = await axiosInstance.get('/user/islogin');
+    return response.status === 200;
+  } catch (error) {
+    console.error('Error checking login status:', error);
+    throw error;
+  }
+};
+
+export { registerUser, loginUser, getUser, updateUser, deleteUser, getUserData, searchUsers, isLogin };
