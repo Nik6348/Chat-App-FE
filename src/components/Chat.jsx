@@ -43,14 +43,14 @@ const Chat = () => {
     // Simulate message delivery and read status updates
     setTimeout(async () => {
       const updatedMessage = { ...latestMessage, status: 'Delivered' };
-      await editMessage(savedMessage.data._id, updatedMessage);
-      socket.emit('message status', updatedMessage);
+      await updateStatusAPI(savedMessage.data._id, updatedMessage);
+      socket.emit('message_delivered', updatedMessage);
     }, 1000);
 
     setTimeout(async () => {
       const updatedMessage = { ...latestMessage, status: 'Seen' };
-      await editMessage(savedMessage.data._id, updatedMessage);
-      socket.emit('message status', updatedMessage);
+      await updateStatusAPI(savedMessage.data._id, updatedMessage);
+      socket.emit('message_seen', updatedMessage);
     }, 3000);
   };
 

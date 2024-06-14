@@ -3,11 +3,11 @@ import io from 'socket.io-client';
 
 const useSocket = (userId, setMessages) => {
   const socketRef = useRef();
-  const apiUrl = 'https://mern-chat-app-be-nik6348s-projects.vercel.app/';
+  const apiUrl = 'https://mern-chat-app-be-nik6348s-projects.vercel.app';
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io(apiUrl, { query: { userId } });
+      socketRef.current = io(apiUrl, { query: { userId }, withCredentials: true});
 
       // Listen for messages from the server
       socketRef.current.on('receive_message', (msg) => {
