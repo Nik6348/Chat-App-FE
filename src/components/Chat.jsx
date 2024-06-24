@@ -78,8 +78,8 @@ const Chat = () => {
         sx={{ flex: 1, padding: '10px', overflowY: 'auto', marginTop: '10px' }}
       >
         <Grid container spacing={1}>
-          {messages.map((msg) => (
-            <Grid item xs={12} key={msg._id}>
+          {messages.map((msg, index) => (
+            <Grid item xs={12} key={index}>
               <Message message={msg} onMarkAsSeen={() => markAsSeen(msg._id)} />
             </Grid>
           ))}
