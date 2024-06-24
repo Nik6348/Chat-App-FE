@@ -29,16 +29,27 @@ const Chat = () => {
   }, [friendId]);
 
   const sendMessage = async (message) => {
-    // Send message in the database
-    const newMessage = await sendMessageAPI(friendId, message);
-    console.log(newMessage);
-    setMessages([...messages, newMessage])
+    const newMessage = {
+      sender: user._id,
+      receiver: friendId,
+      text: message,
+      status: 'Sent',
+      createdAt: new Date(),
+    };
+
+    // Add message to the state
+    setMessages([...messages, newMessage]);
+
     // Send message to the server
     socket.emit('send_message', newMessage);
+
+    // Send message in the database
+    const lettestMessage = await sendMessageAPI(friendId, message);
+
     // Simulate message delivery
     setTimeout(async () => {
-      socket.emit('message_delivered', { messageId: newMessage._id });
-    }, 1000);
+      socket.emit('message_delivered', { messageId: lettestMessage._id });
+    }, 2000);
   };
 
   // Function to mark a message as seen
